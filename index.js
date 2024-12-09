@@ -1,11 +1,13 @@
-const express = require('express');
+
 const path = require('path');
+const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const ejs = require('ejs');
 const crypto = require('crypto');
 const session = require('express-session');
 const connection = require('./Connection');
+
 
 app.use(session({
    key: 'session_cookie_name', 
