@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c2yX41oNRYoBIvJvSXmGGlP89OirXBqNoaBJQkP2Tq9i+IL+C4hQhJCDgaPxh4s" crossorigin="anonymous">
+  <style>
+    
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #495057; /* Default text color */
+    }
+
+    .container {
+        margin-top: 60px;
+    }
+
+    /* Form styling */
+    .form-label {
+        font-weight: 600;
+        color: #800000; /* Maroon label color */
+    }
+    .form-select {
+        border-radius: 8px;
+        padding: 10px;
+        border-color: #800000; /* Maroon border for select */
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: #800000; /* Maroon background */
+        border: none;
+        font-size: 1rem;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    .btn-primary:hover {
+        background-color: #d4af37; /* Golden hover effect */
+    }
+
+    /* Card Styling */
+    .card {
+        border-radius: 10px;
+        background-color: #fff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 350px; /* Set a max-width to prevent the cards from getting too wide */
+        margin: 0 auto; /* Center the card */
+    }
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #800000; /* Maroon text for card title */
+    }
+    .card-subtitle {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+    .card-text {
+        font-size: 1rem;
+        color: #495057;
+    }
+
+    /* No Activity Text */
+    .no-activity {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-top: 40px;
+    }
+
+    /* Flexbox layout for column display */
+    .event-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px; /* Adds space between cards */
+        justify-content: center; /* Center the cards horizontally */
+    }
+
+    /* Make cards responsive */
+    .event-card {
+        flex: 1 1 30%; /* Each card takes up 30% of the available space */
+        min-width: 250px; /* Ensure that cards don't become too small */
+        max-width: 350px; /* Max width for cards */
+    }
+
+    /* Media Queries for responsiveness */
+    @media (max-width: 1024px) {
+        .event-card {
+            flex: 1 1 45%; /* On medium screens, cards take up 45% width */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .event-card {
+            flex: 1 1 100%; /* On small screens, cards take up 100% width */
+        }
+    }
+
+   
+
+
+    .side_bar {
+    position: fixed;
+    top: 0;
+    left: -400px;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    padding: 20px;
+    box-shadow: -3px -3px 7px #ffffff,
+                3px 3px 5px #ceced1,
+                inset -3px -3px 7px #ffffff,
+                inset 3px 3px 5px #ceced1;
+    transition: all 0.3s ease;
+    overflow-y: auto; /* Add vertical scrollbar */
+}
+
+.side_bar .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.side_bar .title .logo {
+    font-size: 27px;
+    font-weight: 600;
+    color: maroon; /* Changed to maroon */
+}
+
+.side_bar .logo {
+    margin-bottom: 20px; /* Add some space below the logo */
+}
+
+.side_bar .logo img {
+    width: 150px; /* Set appropriate width */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
+
+.side_bar ul {
+    margin-top: 35px;
+    list-style: none;
+    padding: 0; /* Remove default padding */
+}
+
+.side_bar ul a {
+    color: maroon; /* Changed to maroon */
+    text-decoration: none;
+    display: block;
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 400;
+    padding: 10px 25px;
+    border-radius: 6px;
+    box-shadow: -3px -3px 7px #ffffff,
+                3px 3px 5px #ceced1;
+    transition: all 0.2s ease;
+}
+
+.side_bar ul a i {
+    margin-right: 10px;
+}
+
+.side_bar ul a:hover {
+    background-color: maroon; /* Changed to maroon */
+    color: #fff;
+}
+
+.media_icons {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+
+.media_icons a {
+    position: relative;
+    margin: 0 4px;
+    font-size: 17px;
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    text-decoration: none;
+    background-color: #f1f1f1;
+    box-shadow: -3px -3px 7px #ffffff,
+                3px 3px 5px #ceced1;
+    transition: all 0.3s ease;
+}
+
+.media_icons a:hover {
+    background-color: maroon; /* Changed to maroon */
+    color: #fff;
+}
+
+/* Media icons custom colors */
+.media_icons a:nth-child(1) {
+    color: #4267b2;
+}
+
+.media_icons a:nth-child(2) {
+    color: #1da1f2;
+}
+
+.media_icons a:nth-child(3) {
+    color: #e1306c;
+}
+
+.media_icons a:nth-child(4) {
+    color: #ff0000;
+}
+
+label {
+    font-size: 17px;
+    color: maroon; /* Changed to maroon */
+    box-shadow: -3px -3px 7px #ffffff,
+                3px 3px 5px #ceced1;
+    height: 37px;
+    width: 37px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 37px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+label:hover {
+    box-shadow: inset -3px -3px 7px #ffffff,
+                inset 3px 3px 5px #ceced1;
+    color: maroon; /* Changed to maroon */
+}
+
+#check {
+    display: none;
+}
+
+.bars {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+}
+
+#check:checked ~ .side_bar {
+    left: 0;
+}
+
+
+
+
+
+    </style>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+</head>
+<body>
+  <div class="container">
+    <!-- Form to select Month -->
+    <form class="row g-3">
+      <div class="col-md-6">
+        <label for="month" class="form-label">Select Month</label>
+        <select id="Month" name="Month" class="form-select">
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+          <option value="November">November</option>
+          <option value="December">December</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-primary w-100">Find Events</button>
+      </div>
+    </form>
+
+    <!-- Event Cards Section -->
+    <div class="event-container mt-4">
+      <% if (Event.length > 0) { %>
+        <% for (let i = 0; i < Event.length; i++) { %>
+          <div class="event-card">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><%= Event[i].Day %></h5>
+                <h6 class="card-subtitle mb-2 text-muted"><%= Event[i].Date %></h6>
+                <p class="card-text"><%= Event[i].Activity %></p>
+              </div>
+            </div>
+          </div>
+        <% } %>
+      <% } else { %>
+        <div class="col-12 text-center">
+          <p class="no-activity">No activity yet for this month.</p>
+        </div>
+      <% } %>
+    </div>
+    <input type="checkbox" id="check">
+    <label class="button bars" for="check"><i class="fas fa-bars"></i></label>
+    <div class="side_bar">
+      <div class="title">
+        <div class="logo">
+            <img src="Public/Images/Uploaded_Images/picsss/IMG-20241008-WA0028.jpg" alt="NUST Adventist Society Logo">
+        </div>
+        <label class=" button cancel" for="check"><i class="fas fa-times"></i></label>
+      </div>
+      <ul>
+        <li><a href="/UserPage"><i class="fas fa-user"></i> Profile</a></li>
+        <li><a href="/Search"><i class="fas fa-search"></i> Search</a></li>
+        <li><a href="/Birthdays"><i class="fas fa-birthday-cake"></i> Birthdays</a></li>
+        <li><a href="Events_Calender"><i class="fas fa-calendar-alt"></i> Events Calendar</a></li>
+        <li><a href="/Anonymous"><i class="fas fa-envelope-open-text"></i> Anonymous Messaging</a></li>
+        <li><a href="/Requests"><i class="fas fa-praying-hands"></i> Prayer Box</a></li>
+        <li><a href="/HomePage"><i class="fas fa-globe"></i> Go to Website</a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+    
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C89scichPD02hX1v7vXrs4ZnB8iYhFL1gM2Qu8AIj6PBVDX9QNz/bg+GVlVI59h/Ckj" crossorigin="anonymous"></script>
+</body>
+</html>
