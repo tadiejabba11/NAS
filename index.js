@@ -7,12 +7,13 @@ const ejs = require('ejs');
 const crypto = require('crypto');
 const session = require('express-session');
 const connection = require('./connection');
-
+const MySQLStore = require('express-mysql-session')(session);
+const sessionStore = new MySQLStore({}, connection);
 
 app.use(session({
    key: 'session_cookie_name', 
    secret: 'session_cookie_secret', 
-
+   store: sessionStore,
    resave: false, 
    saveUninitialized: false, 
    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 day }));
