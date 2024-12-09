@@ -6,7 +6,7 @@ const app = express();
 const ejs = require('ejs');
 const crypto = require('crypto');
 const session = require('express-session');
-const connection = require('./Connection');
+const connection = require('./connection');
 
 
 app.use(session({
