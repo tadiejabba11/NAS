@@ -9,6 +9,8 @@ const session = require('express-session');
 const connection = require('./connection');
 const MySQLStore = require('express-mysql-session')(session);
 const sessionStore = new MySQLStore({}, connection);
+app.set('views', path.join(__dirname, 'views')); 
+app.set('view engine', 'ejs');
 
 app.use(session({
    key: 'session_cookie_name', 
