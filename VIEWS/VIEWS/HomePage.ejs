@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUST Adventist Society</title>
+    <style>
+        /* General body styles */
+      
+    /* General body styles */
+    body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth; /* Enable smooth scrolling */
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navbar Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+/* General body styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth; /* Enable smooth scrolling */
+}
+
+/* Navbar Styles */
+/* Google Fonts Link */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Navbar styling */
+/* Navbar styling */
+nav {
+  background: white;
+  height: 80px;
+  width: 100%;
+  z-index: 20; /* Ensure navbar is above other content */
+  position: fixed; /* Ensure navbar remains fixed */
+  top: 0;
+  left: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
+}
+
+/* Logo styling */
+
+.logo-image{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+   margin-top:10px;
+   margin-left:30px
+}
+
+/* Navigation list */
+nav ul {
+  float: right;
+  margin-right: 20px;
+}
+
+/* List items */
+nav ul li {
+  display: inline-block;
+  line-height: 80px;
+  margin: 0 5px;
+}
+
+/* Links */
+nav ul li a {
+  color: maroon; /* Change color to maroon */
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  text-decoration:none
+}
+
+a.active,
+a:hover {
+  background: maroon; /* Change hover color */
+  color: white; /* Change text color on hover */
+  transition: .5s;
+  
+}
+
+/* Buttons for login and signup */
+.button a {
+    background: white; /* Maroon background for buttons */
+  color: maroon; /* White text color for buttons */
+  border:1px solid maroon;
+  padding: 10px 20px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  transition: background-color .5s;
+}
+
+.button a:hover {
+  background: white; /* White background on hover */
+  color: maroon; /* Maroon text on hover */
+  border: 2px solid maroon;
+}
+
+/* Checkbox for responsive menu */
+.checkbtn {
+  font-size: 22px;
+  color: maroon; /* Change color to maroon */
+  float: right;
+  line-height: 80px;
+  margin-right: 30px;
+  cursor: pointer;
+  display: none;
+}
+
+#check {
+  display: none;
+}
+
+@media (max-width: 1050px) {
+  label.logo {
+    padding-left: 30px;
+  }
+
+  nav ul li a {
+    font-size: 16px;
+  }
+}
+
+/* Responsive media query code for small screen */
+@media (max-width: 890px) {
+  .checkbtn {
+    display: block;
+  }
+  
+  label.logo {
+    font-size: 22px;
+  }
+
+  ul {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    background: white; /* Ensure background matches main navbar */
+    top: 80px;
+    left: -100%;
+    text-align: center;
+    transition: all .5s;
+  }
+
+  nav ul li {
+    display: block;
+    margin: 50px 0;
+    line-height: 30px;
+  }
+
+  nav ul li a {
+    font-size: 20px;
+    color: maroon; /* Ensure color remains maroon */
+  }
+
+  a:hover,
+  a.active {
+    background: maroon; /* Change active background to maroon */
+    color: white; /* Change active text to white */
+  }
+
+  #check:checked ~ ul {
+    left: 0;
+  }
+}
+
+
+section {
+  background-size: cover;
+  height: calc(100vh - 80px);
+  position: relative;
+  background-image: url('Public/Images/Uploaded_Images/picsss/IMG-20241008-WA0028.jpg');
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  color: white;
+  padding-top: 120px; /* Add space for the navbar */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Public/Images/Uploaded_Images/picsss/hero2.jpg') no-repeat center center;
+  background-size: cover;
+  z-index: 1; /* Keep hero section behind navbar */
+}
+
+
+/* Hero Section */
+
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+}
+
+.hero-content h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+/* Call-to-action button in hero */
+.cta-btn {
+    background-color: maroon;
+    color: white;
+    padding: 12px 25px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: auto; /* Remove fixed width */
+    display: inline-block;
+}
+
+.cta-btn:hover {
+    background-color: white;
+    color: maroon;
+    border: 2px solid maroon;
+    transform: scale(1.05);
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+
+/* Sections (Upcoming Event, Intro) */
+.UpcomingEvent {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.UpcomingEvent img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.UpcomingEvent img:hover {
+    transform: scale(1.05);
+}
+
+/* Intro Section */
+.intro {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    margin-top: 40px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.intro h2 {
+    color: maroon;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Flexbox layout for rows */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.col-lg-6 {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Cards for Member and Types of Members */
+body { background-color: #f4f7f6; font-family: 'Roboto', sans-serif; color: #333; margin: 0; padding: 0; } .container { padding: 20px; max-width: 800px; margin: auto; } .card { padding: 20px; margin: 20px 0; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; background-color: white; transition: transform 0.2s, box-shadow 0.2s; } .card:hover { transform: translateY(-10px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); } h3, h4 { color: maroon; margin-bottom: 15px; text-align: center; } p, ol { font-size: 1.1rem; line-height: 1.6; } ol { padding-left: 20px; } ol li { margin-bottom: 10px; } @media (max-width: 768px) { .container { padding: 10px; } .card { padding: 15px; margin: 15px 0; } h3, h4 { font-size: 1.5rem; } p, ol { font-size: 1rem; } }
+/* Weekly Programs Table */
+.Weekly_Programs table {
+    width: 100%;
+    margin-top: 40px;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.Weekly_Programs table th,
+.Weekly_Programs table td {
+    padding: 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.Weekly_Programs table th {
+    background-color: maroon;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.Weekly_Programs table td {
+    background-color: #fff;
+    font-size: 1rem;
+}
+
+.Weekly_Programs table tr:nth-child(even) td {
+    background-color: #f9f9f9;
+}
+.center { text-align: center; color: maroon; /* Change color to maroon to match the theme */ font-size: 2.5rem; /* Adjust the font size */ margin-top: 20px; /* Add some margin to the top */ font-family: 'Arial', sans-serif; /* Choose a nice, clean font */ }
+/* Footer Styles */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+    margin-top: 50px;
+}
+footer p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+
+     
+
+    </style>
+      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+</head>
+<body>
+    <div class="container-fluid">
+
+        <!-- Navbar Section -->
+        <nav>
+            <!-- Checkbox for toggling menu -->
+            <input type="checkbox" id="check">
+            <!-- Menu icon -->
+            <label for="check" class="checkbtn">
+              <i class="fas fa-bars"></i>
+            </label>
+            <!-- Site logo -->
+            <a class="navbar-brand" href="/">
+                <div class="logo-image">
+                      <img src="Public/Images/Uploaded_Images/picsss/IMG-20241008-WA0028.jpg" alt="NUST Adventist Society Logo"" class="img-fluid">
+                </div>
+          </a>
+            <!-- Navigation links -->
+            <ul>
+              <li><a class="active" href="/">Home</a></li>
+              <li><a href="/Exec">About</a></li>
+              <li><a href="/Gallery">Gallery</a></li>
+              <li><a href="/Contact_Us">Contact</a></li>
+              <li class="button"><a href="/Login">Log In</a></li>
+              <li class="button"><a href="/SignUp">Sign Up</a></li>
+            </ul>
+          </nav>
+          
+  <!-- Section for image -->
+  <section>
+    <div class="hero-section"> 
+        <div class="hero-content">
+            <h1>NUST Adventist Society</h1>
+            <p>Join our vibrant community of students living out faith, service, and fellowship. Together, we grow spiritually and serve others.</p>
+           
+        </div>
+    </div>
+
+  </section>
+           
+          </div>
+     
+
+        <!-- Upcoming Event Section -->
+        <div class="UpcomingEvent">
+            <h1>Upcoming Event</h1>
+            <% if (flyer.length > 0) { %>
+                <div class="card">
+                    <div class="card-body">
+                        <img src="<%= flyer[0].Image %>" alt="Upcoming Event">
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="empty-message">
+                    <p class="no-requests">No event yet</p>
+                </div>
+            <% } %>
+        </div>
+        
+        
+        <!-- Intro Section -->
+        <div id="intro" class="intro">
+            <h2  class="center">Welcome to the NUST Adventist Society!</h2>
+            <p>
+                Founded in 1997, the NUST Adventist Society has been a vibrant, welcoming community for students at the National University of Science and Technology (NUST). Born out of a desire to create a distinct space for Adventist students, our society has grown steadily, offering spiritual support, fellowship, and mission-driven activities. We are committed to providing a "home away from home" for students of all backgrounds, fostering inclusivity and social connections.
+                <br><br>
+                Our activities include Bible studies, camps, missions, and our popular Graduation Night, which ensures Adventist students can celebrate their academic achievements while honoring their Sabbath. With a rich history rooted in faith and community, the NUST Adventist Society continues to thrive, empowering students to grow in their spiritual journeys and serve others. Join us as we live out our mission: "Not I but Christ."
+            </p>
+        </div>
+
+        <!-- Who is a Member Section -->
+   
+                <div class="container">
+                    <div class="card">
+                        <h3  class="center">Who is a member</h3>
+                        <p>
+                            All students enrolled at NUST are welcome to join the NUST Adventist Society. There is no discrimination based on creed, race, or sex in our membership process. Membership is granted upon completing the registration process with the society secretary. Members are encouraged to pay a subscription fee as agreed upon by the executive committee.
+                        </p>
+                        <h4>Types of Members</h4>
+                        <ol>
+                            <li><strong>Members still at campus:</strong> These are members who are still pursuing their studies with the university and most likely will be regular participants in all society programs.</li>
+                            <li><strong>Alumni:</strong> These are members who have finished their course of study at the university or those who might not have studied at NUST but have an interest and are friends of the society. They may be NUST workers, Adventists from local churches, or any well-wisher interested in the cause.</li>
+                            <li><strong>Sending Missionaries:</strong> These are people who might not be able to go to the mission field, but they are members of the Society by financing the missionary activities. They support the mission through assisting in the gathering of financial and other resources that aid the mission.</li>
+                        </ol>
+                        <div class="button-container"> <a href="#" class="cta-btn">Join Now</a> </div>
+                    </div>
+                </div>
+            
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-Q6Eo8Xr3Kk+sNXzZV+5mZuT1FfZFb4TT+BZCAlfJTnB8hTbJTwfG2bIhfuXiG4wB" crossorigin="anonymous"></script>
+            </body>
+            </html>
+            
+        
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-Q6Eo8Xr3Kk+sNXzZV+5mZuT1FfZFb4TT+BZCAlfJTnB8hTbJTwfG2bIhfuXiG4wB" crossorigin="anonymous"></script>
+        </body>
+        </html>
+        
+
+        <!-- Weekly Programs Table -->
+    <!-- Weekly Programs Table -->
+<!-- Weekly Programs Table -->
+<div class="Weekly_Programs">
+    <h1 class="center">Weekly Programs</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Program</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Sunday</td>
+                <td>2:00 PM</td>
+                <td>Choir</td>
+            </tr>
+            <tr>
+                <td>Monday</td>
+                <td>12:15 PM</td>
+                <td>Evangelism</td>
+            </tr>
+            <tr>
+                <td>Tuesday</td>
+                <td>12:15 PM</td>
+                <td>Health</td>
+            </tr>
+            <tr>
+                <td>Wednesday</td>
+                <td>12:15 PM</td>
+                <td>Prayer and Fasting</td>
+            </tr>
+            <tr>
+                <td>Thursday</td>
+                <td>12:15 PM</td>
+                <td>Choir</td>
+            </tr>
+            <tr>
+                <td>Friday</td>
+                <td>12:15 PM</td>
+                <td>Evangelism</td>
+            </tr>
+          
+          
+            <tr>
+                <td>Saturday</td>
+                <td>9:00 AM</td>
+                <td>Sabbath Day</td>
+            </tr>
+            <tr>
+                <td>Everyday</td>
+                <td>7:15 AM</td>
+                <td>Prayerband</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 NUST Adventist Society. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
