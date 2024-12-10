@@ -11,7 +11,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const sessionStore = new MySQLStore({}, connection);
 app.set('views', path.join(__dirname, 'views')); 
 app.set('view engine', 'ejs');
-
+console.log(`Views Directory: ${path.join(__dirname, 'views')}`)
 app.use(session({
    key: 'session_cookie_name', 
    secret: 'session_cookie_secret', 
