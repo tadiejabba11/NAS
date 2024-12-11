@@ -9,7 +9,7 @@ const session = require('express-session');
 const connection = require('./connection');
 const MySQLStore = require('express-mysql-session')(session);
 const sessionStore = new MySQLStore({}, connection);
-app.set("views", join(__dirname, "views")); 
+app.set("views", path.join(__dirname, "views")); 
 app.set('view engine', 'ejs');
 console.log(`Views Directory: ${path.join(__dirname, 'views')}`)
 app.use(session({
