@@ -789,7 +789,7 @@ app.get('/Gallery',(req,res)=>{
     }
     else {
   
-    var SQl = "SELECT Link,Title,Image FROM Photo_Link";
+    var SQl = "SELECT Link,Title,Image FROM photo_link";
       connection.query(SQl, (error, result1) => {
         if (error) 
         throw (error)
