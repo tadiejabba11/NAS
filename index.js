@@ -117,7 +117,7 @@ connection.getConnection((error) => {
     throw error
   }
   else {
-    var sql = "INSERT INTO Users(Fullname, Email, RegNo, Password)values(?,?,?,?)";
+    var sql = "INSERT INTO users(Fullname, Email, RegNo, Password)values(?,?,?,?)";
     connection.query(sql, [Fullname, Email, RegNo, Password], (error, result) => {
       if (error) {
         throw error
@@ -206,7 +206,7 @@ app.post('/Personal', (req, res) => {
       throw error
     }
     else {
-      var sql = "INSERT INTO Personal(Level, RegNo,Programme,Phone_No,Address)values(?,?,?,?,?)";
+      var sql = "INSERT INTO personal(Level, RegNo,Programme,Phone_No,Address)values(?,?,?,?,?)";
       connection.query(sql, [Level, RegNo,Programme,Phone_No,Address], (error, result) => {
         if (error) {
           throw error
@@ -513,7 +513,7 @@ app.post('/Programs_Desk',(req,res)=>{
         throw error
       }
       else {
-        var sql = "INSERT INTO Programs_Desk(Activity,Day,Date,Month)values(?,?,?,?)";
+        var sql = "INSERT INTO programs_desk(Activity,Day,Date,Month)values(?,?,?,?)";
         connection.query(sql, [Activity,Day,Date,Month], (error, result) => {
           if (error) {
             throw error
@@ -534,7 +534,7 @@ app.get('/Events_Calender',(req,res)=>{
     }
     else {
   
-    var SQl = "SELECT * FROM Programs_Desk where month=?";
+    var SQl = "SELECT * FROM programs_desk where month=?";
       connection.query(SQl,[Month], (error, result) => {
         if (error)
         throw (error)
@@ -582,7 +582,7 @@ app.get('/Exec',(req,res)=>{
    }
    else {
  
-    var SQl="SELECT Name, Position, Image FROM Exec WHERE Year = ? ORDER BY ID_NO;" 
+    var SQl="SELECT Name, Position, Image FROM exec WHERE Year = ? ORDER BY ID_NO;" 
      
      connection.query(SQl,[Year], (error, result) => {
        if (error)
@@ -766,7 +766,7 @@ app.post('/Photo_Link', upload.single('Image'), (req, res) => {
      throw error
    }
    else {
-     var sql = "INSERT INTO Photo_Link(Link,Title,Image)values(?,?,?)";
+     var sql = "INSERT INTO photo_link(Link,Title,Image)values(?,?,?)";
      connection.query(sql, [Link,Title,Image], (error, result) => {
        if (error) {
          throw error
