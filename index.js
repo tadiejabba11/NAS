@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const crypto = require('crypto');
 const session = require('express-session');
-const connection = require('./connection'); // Ensure this is correct
+const pool = require('./connection'); // Ensure this is correct
 const MySQLStore = require('express-mysql-session')(session);
 
 // Use connection pool if you want better scalability
