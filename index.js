@@ -1,4 +1,3 @@
-
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,19 +7,29 @@ const crypto = require('crypto');
 const session = require('express-session');
 const connection = require('./connection');
 const MySQLStore = require('express-mysql-session')(session);
+
 const sessionStore = new MySQLStore({}, connection);
+
 app.set("views", path.join(__dirname, "views")); 
 app.set('view engine', 'ejs');
-console.log(`Views Directory: ${path.join(__dirname, 'views')}`)
+console.log(`Views Directory: ${path.join(__dirname, 'views')}`);
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(session({
    key: 'session_cookie_name', 
    secret: 'session_cookie_secret', 
    store: sessionStore,
    resave: false, 
    saveUninitialized: false, 
-   cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 day }));
-})
-)
+   cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 day
+}));
+
+// Define your routes here
+
+// Start the server
+
+
 // Your other middleware (e.g., body-parser)
 app.use(express.urlencoded({ extended: true }));
 const moment = require('moment');
