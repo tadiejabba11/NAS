@@ -25,7 +25,7 @@ app.use(session({
 app.use(express.urlencoded({ extended: true }));
 const moment = require('moment');
 const multer = require('multer');
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, 'Public')));
 
 const storage = multer.diskStorage({
   destination: './Public/Images/Uploaded_Images/',
