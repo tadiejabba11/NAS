@@ -1,41 +1,26 @@
+
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const app = express();
 const ejs = require('ejs');
 const crypto = require('crypto');
 const session = require('express-session');
-const pool = require('./connection'); // Ensure this is correct
+const connection = require('./connection');
 const MySQLStore = require('express-mysql-session')(session);
-
-// Use connection pool if you want better scalability
-const sessionStore = new MySQLStore({}, pool); // Or use `pool` if you're using a pool
-
-const app = express();
-
+const sessionStore = new MySQLStore({}, connection);
 app.set("views", path.join(__dirname, "views")); 
 app.set('view engine', 'ejs');
-console.log(`Views Directory: ${path.join(__dirname, 'views')}`);
-
-app.use(bodyParser.urlencoded({ extended: true }));
-
+console.log(`Views Directory: ${path.join(__dirname, 'views')}`)
 app.use(session({
    key: 'session_cookie_name', 
    secret: 'session_cookie_secret', 
-   store: sessionStore, // Store session in MySQL
+   store: sessionStore,
    resave: false, 
    saveUninitialized: false, 
-   cookie: {
-     maxAge: 24 * 60 * 60 * 1000, // 1 day
-     secure: true, // Set to true in production if using HTTPS
-   }
-}));
-
-
-// Define your routes here
-
-// Start the server
-
-
+   cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 day }));
+})
+)
 // Your other middleware (e.g., body-parser)
 app.use(express.urlencoded({ extended: true }));
 const moment = require('moment');
@@ -62,6 +47,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
+
+function isAuthenticated(req, res, next) { if (req.session && (req.session.isLoggedIn || req.session.userType)) { return next(); // User is authenticated, proceed to the next middleware/route handler 
+} else { res.redirect('/login'); // User is not authenticated, redirect to the login page
+   } }
 app.get('/logout', (req, res) => {
   // Destroy the session
   req.session.destroy((err) => {
@@ -84,7 +73,7 @@ app.get('/Anonymous', (req,res)=>{
 }
 
 )
-app.get('/Programs_Desk',(req,res)=>{
+app.get('/Programs_Desk', isAuthenticated,(req,res)=>{
   res.render('Programs_Desk')
 })
 app.get('/Requests', (req,res)=>{
@@ -113,22 +102,22 @@ app.get('/Contact_Us', (req,res)=>{
   res.render('Contact_Us')
 })
 app.post('/SignUp', (req, res) => {
-  var Fullname = req.body.Fullname; // Get the full name from the request body
-  var Email = req.body.Email; // Get the Email from the request body
-  var Password = req.body.Password;
-  
+  const Fullname = req.body.Fullname; // Get the full name from the request body
+  const Email = req.body.Email; // Get the Email from the request body
+  const Password = req.body.Password;
+
   function generateID() {
     // Generate a random 8-digit hexadecimal string
     const randomDigits = crypto.randomBytes(4).toString('hex');
-    
+
     // Construct the ID with the desired format
     const id = `nas${randomDigits}s`;
-    
+
     return id;
   }
-  
+
   const generatedID = generateID();
-  var RegNo = generatedID;
+  const RegNo = generatedID;
 
   connection.getConnection((error, connection) => {
     if (error) {
@@ -136,11 +125,11 @@ app.post('/SignUp', (req, res) => {
       res.status(500).send("Database connection error.");
       return;
     } else {
-      var sql = "INSERT INTO users(Fullname, Email, RegNo, Password) VALUES (?, ?, ?, ?)";
+      const sql = "INSERT INTO Users (Fullname, Email, RegNo, Password) VALUES (?, ?, ?, ?)";
       connection.query(sql, [Fullname, Email, RegNo, Password], (error, result) => {
         // Ensure the connection is released back to the pool
         connection.release();
-        
+
         if (error) {
           console.error('Error executing query:', error);
           res.status(500).send("Query execution error.");
@@ -152,470 +141,649 @@ app.post('/SignUp', (req, res) => {
   });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
   const Email = req.body.Email;
   const Password = req.body.Password;
-
+  
   // Check for Secretary credentials first
   if (Email === 'NasSecretary@gmail.com' && Password === 'S3C@nas2024') {
+    req.session.isLoggedIn = true; 
+    req.session.userType = 'Secretary';
     return res.redirect('/Secretary');
   }
   if (Email === 'NasProgramsDesk@gmail.com' && Password === 'Prog@546!!') {
+    req.session.isLoggedIn = true; req.session.userType = 'Programs_Desk';
     return res.redirect('/Programs_Desk');
   }
   if (Email === 'NASPRO@gmail.com' && Password === '@NA$PRO2024') {
+     req.session.isLoggedIn = true; req.session.userType = 'PROs_Desk'
     return res.redirect('/PROs_Desk');
   }
   if (Email === 'NASDLD@gmail.com' && Password === 'DLD@NAS#123') {
+    req.session.isLoggedIn = true; req.session.userType = 'DLDs_Desk';
     return res.redirect('/DLDs_Desk');
   }
 
-  try {
-    const sql = "SELECT * FROM users WHERE Email = ? AND Password = ?";
-    const [result] = await connection.promise().query(sql, [Email, Password]);
-
-    if (result.length > 0) {
-      // Store RegNo in session
-      req.session.RegNo = result[0].RegNo;  // Save RegNo in session
-      res.redirect('/UserPage');  // Redirect to UserPage
+  connection.getConnection((error,connection) => {
+    if (error) {
+      throw error;
     } else {
-      res.send("Invalid email or password");
+      const sql = "SELECT * FROM users WHERE Email = ? AND Password = ?";
+      connection.query(sql, [Email, Password], (error, result) => {
+        connection.release();
+        if (error) {
+          throw error;
+        }
+      
+
+        if (result.length > 0) {
+          // Store RegNo in session
+          req.session.RegNo = result[0].RegNo;  // Save RegNo in session
+          res.redirect('/UserPage');  // Redirect to UserPage
+        } else {
+          res.redirect('/login');
+        }
+      });
     }
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
+  });
 });
 
-app.post('/Personal2', upload.single('Image'), async (req, res) => {
-  const RegNo = req.body.RegNo;
-  const DOB = req.body.DOB;
-  const Image = `Public/Images/Uploaded_Images/${req.file.filename}`;
-  const Gender = req.body.Gender;
 
-  try {
-    const sql = "INSERT INTO personal2 (RegNo, DOB, Image, Gender) VALUES (?, ?, ?, ?)";
-    await pool.promise().execute(sql, [RegNo, DOB, Image, Gender]);
-    res.redirect('/Personal?RegNo=' + RegNo);
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
+app.post('/Personal2', upload.single('Image'), (req, res) => {
+  var RegNo = req.body.RegNo;
+  var DOB = req.body.DOB;
+   var Image = `Public/Images/Uploaded_Images/${req.file.filename}`;
+   var Gender=req.body.Gender;
+  connection.getConnection((error,connection) => {
+    if (error) {
+      throw error
+    }
+    else {
+      var sql = "INSERT INTO personal2(RegNo,DOB,Image,Gender)values(?,?,?,?)";
+      connection.query(sql, [RegNo,DOB,Image,Gender], (error, result) => {
+        connection.release();
+        if (error) {
+          throw error
+        }
+        else {
+          res.redirect('/Personal?RegNo=' + RegNo)
+        }
+       
+      })
+    }
+  })
+
+
 });
+app.post('/Personal', (req, res) => {
+ 
+  var RegNo = req.body.RegNo;
+  var Programme = req.body.Programme;
+  var Phone_No = req.body.Phone_No;
+  var Level=req.body.Level;
+  var Address=req.body.Address
+  connection.getConnection((error,connection) => {
+    if (error) {
+      throw error
+    }
+    else {
+      var sql = "INSERT INTO Personal(Level, RegNo,Programme,Phone_No,Address)values(?,?,?,?,?)";
+      connection.query(sql, [Level, RegNo,Programme,Phone_No,Address], (error, result) => {
+        connection.release();
+        if (error) {
+          throw error
+        }
+        else {
+          res.redirect('/login')
+        }
+       
+      })
+    }
+  })
 
+
+});
 
        
   
   
-app.get('/', async (req, res) => {
-  try {
-    // Modify SQL to fetch only the latest flyer
-    const SQl = "SELECT * FROM flyers ORDER BY ID_No DESC LIMIT 1";
-    const [result] = await pool.promise().execute(SQl);
-    
-    res.render('HomePage', { flyer: result[0] });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("Query execution error.");
-  }
-});
+app.get('/', (req, res) => {
+  connection.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+      res.status(500).send("Database connection error.");
+    } else {
+      // Modify SQL to fetch only the latest flyer
+      const SQl = "SELECT * FROM flyers ORDER BY ID_No DESC LIMIT 1";
+      connection.query(SQl, (error, result) => {
+        connection.release(); // Ensure the connection is released back to the pool
 
-
-app.post('/Anonymous', async (req, res) => {
-  var Anonymous_text = req.body.Anonymous_text;
-
-  try {
-    // Use the promise-based execute method directly
-    const sql = "INSERT INTO anonymous(Anonymous_text) VALUES (?)";
-    await pool.promise().execute(sql, [Anonymous_text]);
-
-    res.redirect('Anonymous');
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
-
-app.post('/Requests', async (req, res) => {
-  const Request = req.body.Request;
-
-  try {
-    const sql = "INSERT INTO prayer_requests (Request) VALUES (?)";
-    await pool.promise().execute(sql, [Request]);
-    res.redirect('Requests');
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
-
-
-app.get('/PROs_Desk', async (req, res) => {
-  try {
-    const sql = "SELECT * FROM anonymous";
-    const [result] = await pool.promise().execute(sql);
-    
-    res.render('PROs_Desk', { anonymous: result });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
-
-
-app.post('/PROs_Desk', upload.single('Image'), async (req, res) => {
-  var Image = `Public/Images/Uploaded_Images/${req.file.filename}`;
-
-  try {
-    const sql = "INSERT INTO flyers (Image) VALUES (?)";
-    await pool.promise().execute(sql, [Image]);
-    res.redirect('HomePage');
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
+        if (error) {
+          console.log(error);
+          res.status(500).send("Query execution error.");
+        } else {
+          res.render('HomePage', { flyer: result });
+        }
+      });
+    }
+  });
 });
 
 
 
+app.post('/Anonymous',(req,res)=>{
+    var Anonymous_text=req.body.Anonymous_text;
+    connection.getConnection((error,connection) => {
+        if (error) {
+          throw error
+        }
+        else {
+          var sql = "INSERT INTO anonymous(Anonymous_text)values(?)";
+          connection.query(sql, [Anonymous_text], (error, result) => {
+            connection.release();
+            if (error) {
+              throw error
+            }
+            else {
+              res.redirect('Anonymous')
+            }
+          })
+        }
+      })
+})
+app.post('/Requests',(req,res)=>{
+    var Request=req.body.Request;
+    connection.getConnection((error,connection) => {
 
-app.get('/DLDs_Desk', async (req, res) => {
-  try {
-    const sql = "SELECT * FROM prayer_requests";
-    const [result] = await pool.promise().execute(sql);
-    
-    res.render('DLDs_Desk', { requests: result });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
+        if (error) {
+          throw error
+        }
+        else {
+          var sql = "INSERT INTO prayer_requests(Request)values(?)";
+          connection.query(sql, [Request], (error, result) => {
+            connection.release();
+            if (error) {
+              throw error
+            }
+            else {
+             res.redirect('Requests')
+            }
+          })
+        }
+      })
+})
+
+app.get('/PROs_Desk', isAuthenticated, async (req, res) => {
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error)
+    }
+    else {
+
+     var SQl= "SELECT * from anonymous";
+      connection.query(SQl, (error, result) => {
+        connection.release();
+        if (error) 
+        throw (error)
+          else {
+            res.render('PROs_Desk', { anonymous: result });
+          }
+        
+
+
+      })
+
+    }
+  })
 });
 
+app.post('/PROs_Desk', upload.single('Image'), (req, res) => {
 
-app.get('/Secretary', async (req, res) => {
-  try {
-    const SQl = "SELECT personal.Phone_No FROM personal JOIN users ON users.RegNo = personal.RegNo";
-    const sql2 = "SELECT users.RegNo, users.Fullname, personal2.Gender FROM users JOIN personal2 ON users.RegNo = personal2.RegNo";
-    
-    const [result1] = await pool.promise().execute(SQl);
-    const [result] = await pool.promise().execute(sql2);
-    
-    res.render('Secretary', { Users: result, Phone_No: result1 });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+   var Image = `Public/Images/Uploaded_Images/${req.file.filename}`;
+ 
+  connection.getConnection((error,connection) => {
+    if (error) {
+      throw error
+    }
+    else {
+      var sql = "INSERT INTO flyers(Image)values(?)";
+      connection.query(sql, [Image], (error, result) => {
+        connection.release();
+        if (error) {
+          throw error
+        }
+        else {
+          res.redirect('/')
+        }
+      })
+    }
+  })
+})
 
 
-app.post('/Secretary', async (req, res) => {
+
+
+app.get('/DLDs_Desk', isAuthenticated, async (req, res) => {
+    connection.getConnection((error,connection) => {
+      if (error) {
+        console.log(error)
+      }
+      else {
+  
+       var SQl= "SELECT * from prayer_requests";
+        connection.query(SQl, (error, result) => {
+          connection.release();
+          if (error) 
+          throw (error)
+            else {
+              res.render('DLDs_Desk', { requests: result });
+            }
+          
+  
+  
+        })
+  
+      }
+    })
+  });
+
+  app.get('/Secretary', isAuthenticated, (req, res) => { connection.getConnection((error, connection) => {
+     if (error) { console.log(error); res.status(500).send("Database connection error.");
+
+      } else {
+         var sql2 = "SELECT users.RegNo, users.Fullname, personal2.Gender FROM users JOIN personal2 ON users.RegNo = personal2.RegNo"; 
+         var SQl = "SELECT personal.Phone_No FROM personal JOIN users ON users.RegNo = personal.RegNo"; 
+         connection.query(SQl, (error, result1) => { 
+          if (error) { console.log(error); connection.release(); res.status(500).send("Query execution error."); 
+    return; } connection.query(sql2, (error, result) => {
+       connection.release(); // Ensure the connection is released back to the pool 
+  if (error) { 
+    console.log(error); 
+    res.status(500).send("Query execution error."); 
+  } else { res.render('Secretary', { Users: result, Phone_No: result1 });
+ } 
+}); 
+}); 
+}
+ });
+ });
+
+app.post('/Secretary', (req, res) => {
   const Fullname = req.body.Fullname;
   const Gender = req.body.Gender;
 
-  try {
-    // Base query
-    let SQl = `
-      SELECT users.RegNo, users.Fullname, personal2.Gender 
-      FROM users 
-      JOIN personal2 ON users.RegNo = personal2.RegNo 
-      WHERE 1=1`;
-    let params = [];
+  connection.getConnection((error, conn) => {
+    if (error) {
+      console.log(error);
+      res.status(500).send("Internal Server Error");
+    } else {
+      // Base query
+      let SQl = `
+        SELECT users.RegNo, users.Fullname, personal2.Gender 
+        FROM users 
+        JOIN personal2 ON users.RegNo = personal2.RegNo 
+        WHERE 1=1`;
+      let params = [];
 
-    // Add conditions based on provided inputs
-    if (Fullname) {
-      SQl += ' AND Fullname LIKE ?';
-      params.push(`%${Fullname}%`);
+      // Add conditions based on provided inputs
+      if (Fullname) {
+        SQl += ' AND Fullname LIKE ?';
+        params.push(`%${Fullname}%`);
+      }
+      if (Gender) {
+        SQl += ' AND Gender LIKE ?';
+        params.push(`%${Gender}%`);
+      }
+
+      const SQL = `
+        SELECT personal.Phone_No 
+        FROM personal 
+        JOIN users ON users.RegNo = personal.RegNo`;
+
+      // First query
+      conn.query(SQl, params, (error, result) => {
+        if (error) {
+          console.log(error);
+          res.status(500).send("Internal Server Error");
+        } else {
+          // Second query
+          conn.query(SQL, (error, result1) => {
+            if (error) {
+              console.log(error);
+              res.status(500).send("Internal Server Error");
+            } else {
+              res.render('Secretary', { Users: result, Phone_No: result1 });
+            }
+            conn.release(); // Release the connection
+          });
+        }
+      });
     }
-    if (Gender) {
-      SQl += ' AND Gender LIKE ?';
-      params.push(`%${Gender}%`);
-    }
-
-    const SQL = `
-      SELECT personal.Phone_No 
-      FROM personal 
-      JOIN users ON users.RegNo = personal.RegNo`;
-
-    // Execute the first query
-    const [result] = await pool.promise().execute(SQl, params);
-    
-    // Execute the second query
-    const [result1] = await pool.promise().execute(SQL);
-
-    // Render the Secretary page
-    res.render('Secretary', { Users: result, Phone_No: result1 });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Internal Server Error");
-  }
+  });
 });
 
 
 
 
-
-app.get('/birthdays', async (req, res) => {
-  try {
-    const SQl = `
-      SELECT users.Fullname, personal2.Image 
-      FROM users 
-      JOIN personal2 ON users.RegNo = personal2.RegNo 
-      WHERE DATE_FORMAT(DOB, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')`;
-
-    const [result1] = await pool.promise().execute(SQl);
-    res.render('birthdays', { Birthdays: result1 });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
+app.get('/birthdays',(req,res)=>{
+  connection.getConnection((error,connection) => {
+  if (error) {
+    console.log(error)
   }
+  else {
+
+  var SQl = "SELECT users.Fullname,personal2.Image FROM users join personal2 on users.RegNo=personal2.RegNo WHERE DATE_FORMAT(DOB,'%m-%d')= DATE_FORMAT(CURDATE(), '%m-%d')";
+    connection.query(SQl, (error, result1) => {
+      connection.release()
+      if (error) 
+      throw (error)
+      res.render('birthdays', { Birthdays: result1 });
+})
+
+  }
+})
 });
 
-
-app.get('/Search', async (req, res) => {
-  const Fullname = req.query.Fullname;
-
-  try {
-    const SQl = `
-      SELECT users.RegNo, users.Fullname, personal2.Image 
-      FROM users 
-      JOIN personal2 ON users.RegNo = personal2.RegNo 
-      WHERE Fullname LIKE ?`;
-    
-    const [result1] = await pool.promise().execute(SQl, [`%${Fullname}%`]);
-    res.render('Search', { Search: result1 });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
+app.get('/Search',(req,res)=>{
+Fullname=req.query.Fullname;
+connection.getConnection((error,connection) => {
+  if (error) {
+    console.log(error)
   }
-});
+  else {
 
+  var SQl = "SELECT users.RegNo,users.Fullname,personal2.Image FROM users join personal2 on users.RegNo=personal2.RegNo where Fullname like '%"+ Fullname +"%'";
+    connection.query(SQl, (error, result1) => {
+      connection.release()
+      if (error) 
+      throw (error)
+      res.render('Search', { Search: result1 });
+})
 
-app.post('/Secretary', async (req, res) => {
+  }
+})
+})
+
+app.post('/Secretary', (req,res)=>{
   const RegNo = req.body.RegNo;
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error);
+    } else {
+      var Sql="select Fullname from users"
+      var sql = "SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, personal.Address, personal.Level, personal.Programme, personal.Phone_No FROM personal JOIN personal2 ON personal2.RegNo = personal.RegNo WHERE personal.RegNo = ?";
+      connection.query(sql, [RegNo], (error, result) => {
+        connection.release()
+        if (error) throw (error)
+        connection.query(Sql, [RegNo],(error, result1) =>{
+          connection.release()
+          if (error)
+            throw error
+          else{
+            res.render('SecViewMore', { Personal: result[0], Name: result1[0]});
+          }
+        })
+      
+      });
+    }
+  });
 
-  try {
-    const Sql = "SELECT Fullname FROM users";
-    const sql = "SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, personal.Address, personal.Level, personal.Programme, personal.Phone_No FROM personal JOIN personal2 ON personal2.RegNo = personal.RegNo WHERE personal.RegNo = ?";
-
-    const [result] = await pool.promise().execute(sql, [RegNo]);
-
-    const [result1] = await pool.promise().execute(Sql);
-
-    res.render('SecViewMore', { Personal: result[0], Name: result1[0] });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
-
-
-
-
-
-
-app.post('/Programs_Desk', async (req, res) => {
-  const Day = req.body.Day;
-  const Date = req.body.Date;
-  const Month = req.body.Month;
-  const Activity = req.body.Activity;
-
-  try {
-    const sql = "INSERT INTO programs_desk (Activity, Day, Date, Month) VALUES (?, ?, ?, ?)";
-    await pool.promise().execute(sql, [Activity, Day, Date, Month]);
-    res.redirect('/Events_Calender');
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+})
 
 
-app.get('/Events_Calender', async (req, res) => {
-  const Month = req.query.Month;
-
-  try {
-    const SQl = "SELECT * FROM programs_desk WHERE month = ?";
-    const [result] = await pool.promise().execute(SQl, [Month]);
-    
-    res.render('Events_Calender', { Event: result });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
 
 
-app.get('/UserPage', async (req, res) => {
-  const RegNo = req.session.RegNo;
-  if (!RegNo) {
-    return res.redirect('/login');  // Redirect to login if no session
-  }
+app.post('/Programs_Desk',(req,res)=>{
+  var Day=req.body.Day;
+  var Date=req.body.Date;
+  var Month=req.body.Month;
+  var Activity=req.body.Activity;
+  connection.getConnection((error,connection) => {
+      if (error) {
+        throw error
+      }
+      else {
+        var sql = "INSERT INTO Programs_Desk(Activity,Day,Date,Month)values(?,?,?,?)";
+        connection.query(sql, [Activity,Day,Date,Month], (error, result) => {
+          connection.release()
+          if (error) {
+            throw error
+          }
+          else {
+            res.redirect('/Events_Calender')
+          }
+        })
+      }
+    })
+})
 
-  try {
-    const sql = "SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, personal.Address, personal.Level, personal.Programme, personal.Phone_No FROM personal JOIN personal2 ON personal2.RegNo = personal.RegNo WHERE personal.RegNo = ?";
-    const Sql = "SELECT Fullname FROM users";
+app.get('/Events_Calender',(req,res)=>{
+  Month=req.query.Month;
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error)
+    }
+    else {
+  
+    var SQl = "SELECT * FROM Programs_Desk where month=?";
+      connection.query(SQl,[Month], (error, result) => {
+        connection.release()
+        if (error)
+        throw (error)
+        res.render('Events_Calender', { Event: result});
+  })
+  
+    }
+  })
+  })
 
-    const [result] = await pool.promise().execute(sql, [RegNo]);
-    const [result1] = await pool.promise().execute(Sql);
-
-    res.render('UserPage', { Personal: result[0], Name: result1[0] });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+  app.get('/UserPage', (req, res) => {
+    const RegNo = req.session.RegNo;
+    if (!RegNo) {
+      return res.redirect('/login');  // Redirect to login if no session
+    }
 
   
-app.get('/Exec', async (req, res) => {
-  const Year = req.query.Year;
+    connection.getConnection((error,connection) => {
+      if (error) {
+        console.log(error);
+      } else {
+        var Sql="select Fullname from users"
+        var sql = "SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, personal.Address, personal.Level, personal.Programme, personal.Phone_No FROM personal JOIN personal2 ON personal2.RegNo = personal.RegNo WHERE personal.RegNo = ?";
+        connection.query(sql, [RegNo], (error, result) => {
+          connection.release()
+          if (error) throw (error)
+          connection.query(Sql, [RegNo],(error, result1) =>{
+            connection.release()
+            if (error)
+              throw error
+            else{
+              res.render('UserPage', { Personal: result[0], Name: result1[0]});
+            }
+          })
+        
+        });
+      }
+    });
+  });
+  
 
-  try {
-    const SQl = "SELECT Name, Position, Image FROM exec WHERE Year = ? ORDER BY ID_NO";
-    const [result] = await pool.promise().execute(SQl, [Year]);
-    
-    res.render('Exec', { Executive: result });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+app.get('/Exec',(req,res)=>{
+  var Year=req.query.Year;
+ connection.getConnection((error,connection) => {
+   if (error) {
+     console.log(error)
+   }
+   else {
+ 
+    var SQl="SELECT Name, Position, Image FROM Exec WHERE Year = ? ORDER BY ID_NO;" 
+     
+     connection.query(SQl,[Year], (error, result) => {
+      connection.release()
+       if (error)
+       throw (error)
+      res.render('Exec',{Executive:result})
+ })
+ 
+   }
+ })
+})
 
 
 
   
-app.post('/Update', upload.single('Image'), async (req, res) => {
-  let Image;
-  if (req.file) {
-    Image = `Public/Images/Uploaded_Images/${req.file.filename}`;
-  } else {
-    Image = req.body.Image2; // Use the existing image if no new image is uploaded 
-  }
+app.post('/Update', upload.single('Image'), (req, res) => {
+   let Image; if (req.file) { Image = `Public/Images/Uploaded_Images/${req.file.filename}`; }
+    else { Image = req.body.Image2; // Use the existing image if no new image is uploaded 
+      } 
+      const Phone_No = req.body.Phone_No; 
+      const Address = req.body.Address; 
+      const Level = req.body.Level; 
+      const RegNo = req.body.RegNo; 
+      connection.getConnection((error,connection) => {
+         if (error) {
+           throw error; } else {
+             const sql = "UPDATE personal SET `Phone_No`=?, `Level`=?, `Address`=? WHERE RegNo=?";
+              const SQL = "UPDATE personal2 SET `Image`=? WHERE RegNo=?"; 
+              connection.query(sql, [Phone_No, Level, Address, RegNo], (error, result) => {
+                connection.release()
+                 if (error) { throw error; } 
+                 else { connection.query(SQL, [Image, RegNo], (error, result) => {
+                  connection.release() 
+                  if (error) { throw error; } 
+                  else { res.redirect(`/Update?RegNo=${RegNo}`); // Redirect to the specific profile page
+                   } }); } }); } })});
 
-  const Phone_No = req.body.Phone_No;
-  const Address = req.body.Address;
-  const Level = req.body.Level;
-  const RegNo = req.body.RegNo;
-
-  try {
-    const sql = "UPDATE personal SET `Phone_No`=?, `Level`=?, `Address`=? WHERE RegNo=?";
-    const SQL = "UPDATE personal2 SET `Image`=? WHERE RegNo=?";
-
-    await pool.promise().execute(sql, [Phone_No, Level, Address, RegNo]);
-    await pool.promise().execute(SQL, [Image, RegNo]);
-
-    res.redirect(`/Update?RegNo=${RegNo}`); // Redirect to the specific profile page
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
+app.get('/Update', (req, res) => {
+  var RegNo = req.query.RegNo;
+  connection.getConnection((error,connection) => {
+      if (error) {
+          console.log(error);
+      } else {
+          var SQL = "SELECT * from personal where RegNo=?";
+          var Sql="select * from personal2 where RegNo=?"
+          connection.query(SQL, [RegNo], (error, result) => {
+            connection.release()
+              if (error) {
+                  throw (error);
+              }
+                  connection.query(Sql, [RegNo], (error, result1) => {
+                    connection.release()
+                    if (error) {
+                        throw (error);
+                    }
+                    if (result.length > 0) {
+                        res.render('Update', { Update: result[0], ImageUpdate:result1[0],RegNo  });
+              } else {
+                  console.log("No data found for RegNo:", RegNo);
+                 
+              }
+          });
+      }
+    )}
+  });
 });
 
-app.get('/Update', async (req, res) => {
-  const RegNo = req.query.RegNo;
-
-  try {
-    const SQL = "SELECT * FROM personal WHERE RegNo = ?";
-    const Sql = "SELECT * FROM personal2 WHERE RegNo = ?";
-
-    const [result] = await pool.promise().execute(SQL, [RegNo]);
-    const [result1] = await pool.promise().execute(Sql, [RegNo]);
-
-    if (result.length > 0) {
-      res.render('Update', { Update: result[0], ImageUpdate: result1[0], RegNo });
+app.get('/ViewMore', (req, res) => {
+  var RegNo = req.query.RegNo;
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error);
     } else {
-      console.log("No data found for RegNo:", RegNo);
+      var sql = "SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, personal.Address, personal.Level, personal.Programme, personal.Phone_No FROM personal JOIN personal2 ON personal2.RegNo = personal.RegNo WHERE personal.RegNo = ?";
+      connection.query(sql, [RegNo], (error, result) => {
+        connection.release()
+        if (error) throw error;
+        
+        console.log(result); // Log the result to check the data
+        
+        if (result.length > 0) {
+          res.render('ViewMore', { Personal: result[0] });
+        } else {
+          res.send('No records found');
+        }
+      });
     }
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
+  });
 });
 
+app.get('/SecViewMore',(req,res)=>{
+  const RegNo=req.query.RegNo;
 
-app.get('/ViewMore', async (req, res) => {
-  const RegNo = req.query.RegNo;
 
-  try {
-    const sql = `
-      SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, 
-             personal.Address, personal.Level, personal.Programme, personal.Phone_No 
-      FROM personal 
-      JOIN personal2 ON personal2.RegNo = personal.RegNo 
-      WHERE personal.RegNo = ?`;
-
-    const [result] = await pool.promise().execute(sql, [RegNo]);
-
-    console.log(result); // Log the result to check the data
-
-    if (result.length > 0) {
-      res.render('ViewMore', { Personal: result[0] });
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error);
     } else {
-      res.send('No records found');
+      var Sql="select Fullname from users"
+      var sql = "SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, personal.Address, personal.Level, personal.Programme, personal.Phone_No FROM personal JOIN personal2 ON personal2.RegNo = personal.RegNo WHERE personal.RegNo = ?";
+      connection.query(sql, [RegNo], (error, result) => {
+        connection.release()
+        if (error) throw (error)
+        connection.query(Sql, [RegNo],(error, result1) =>{
+          connection.release()
+          if (error)
+            throw error
+          else{
+            res.render('SecViewMore', { Personal: result[0], Name: result1[0]});
+          }
+        })
+      
+      });
     }
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+})
+})
+app.get('/ChangePassword',(req,res)=>{
+  RegNo=req.query.RegNo
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error);
+    } else {
+      var Sql="select Password from users WHERE RegNo=?"
+     connection.query(Sql, [RegNo],(error, result) =>{
+      connection.release()
+          if (error)
+            throw error
+          else{
+            res.render('ChangePassword', { Personal: result[0]});
+          }
+        })
+      
+    }
+})
 
 
-app.get('/SecViewMore', async (req, res) => {
-  const RegNo = req.query.RegNo;
-
-  try {
-    const sql = `
-      SELECT personal2.DOB, personal2.Gender, personal2.Image, personal2.RegNo, 
-             personal.Address, personal.Level, personal.Programme, personal.Phone_No 
-      FROM personal 
-      JOIN personal2 ON personal2.RegNo = personal.RegNo 
-      WHERE personal.RegNo = ?`;
-    const Sql = "SELECT Fullname FROM users";
-
-    const [result] = await pool.promise().execute(sql, [RegNo]);
-    const [result1] = await pool.promise().execute(Sql);
-
-    res.render('SecViewMore', { Personal: result[0], Name: result1[0] });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
-
-app.get('/ChangePassword', async (req, res) => {
-  const RegNo = req.query.RegNo;
-
-  try {
-    const Sql = "SELECT Password FROM users WHERE RegNo = ?";
-    const [result] = await pool.promise().execute(Sql, [RegNo]);
-
-    res.render('ChangePassword', { Personal: result[0] });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+})
 
 
 
-
-app.post('/ChangePassword', async (req, res) => {
+app.post('/ChangePassword', (req, res) => {
   const currentPassword = req.body.Current;
   const currentPasswordInput = req.body.Current1;
   const newPassword = req.body.Password;
-  const confirmPassword = req.body.Password1;
+  const confirmPassword = req.body.Password1; // Corrected from `Level` to `Password1`
   const regNo = req.body.RegNo;
 
   if (currentPasswordInput === currentPassword) {
     if (newPassword === confirmPassword) {
-      try {
-        const sql = "UPDATE users SET `Password` = ? WHERE RegNo = ?";
-        await pool.promise().execute(sql, [newPassword, regNo]);
-        res.send('Password Changed Successfully');
-        console.log('Password changed for:', regNo);
-      } catch (error) {
-        console.error('Error executing query:', error);
-        res.status(500).send("Internal Server Error");
-      }
+      connection.getConnection((error, conn) => {
+        if (error) {
+          console.error(error);
+          res.status(500).send("Internal Server Error");
+        } else {
+          const sql = "UPDATE users SET `Password` = ? WHERE RegNo = ?";
+          conn.query(sql, [newPassword, regNo], (error, result) => {
+            if (error) {
+              console.error(error);
+              res.status(500).send("Internal Server Error");
+            } else {
+              res.send('Password Changed Successfully');
+              console.log('Password changed for:', regNo);
+            }
+            conn.release(); // Release the connection
+          });
+        }
+      });
     } else {
       res.send('Passwords do not match');
     }
@@ -625,40 +793,57 @@ app.post('/ChangePassword', async (req, res) => {
   }
 });
 
-
 app.get('/Photo_Link',(req,res)=>{
   res.render('Photo_Link')
 })
 
-app.post('/Photo_Link', upload.single('Image'), async (req, res) => {
+app.post('/Photo_Link', upload.single('Image'), (req, res) => {
+
   var Image = `Public/Images/Uploaded_Images/${req.file.filename}`;
-  var Link = req.body.Link;
-  var Title = req.body.Title;
-
-  try {
-    const sql = "INSERT INTO photo_link (Link, Title, Image) VALUES (?, ?, ?)";
-    await pool.promise().execute(sql, [Link, Title, Image]);
-    res.redirect('Gallery');
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+  var Link=req.body.Link;
+  var Title=req.body.Title;
 
 
+ connection.getConnection((error,connection) => {
+   if (error) {
+     throw error
+   }
+   else {
+     var sql = "INSERT INTO Photo_Link(Link,Title,Image)values(?,?,?)";
+     connection.query(sql, [Link,Title,Image], (error, result) => {
+      connection.release()
+       if (error) {
+         throw error
+       }
+       else {
+         res.redirect('Gallery')
+       }
+     })
+   }
+ })
+})
 
 
-app.get('/Gallery', async (req, res) => {
-  try {
-    const SQl = "SELECT Link, Title, Image FROM photo_link";
-    const [result1] = await pool.promise().execute(SQl);
 
-    res.render('Gallery', { Gallery: result1 });
-  } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).send("Query execution error.");
-  }
-});
+app.get('/Gallery',(req,res)=>{
+  
+  connection.getConnection((error,connection) => {
+    if (error) {
+      console.log(error)
+    }
+    else {
+  
+    var SQl = "SELECT Link,Title,Image FROM Photo_Link";
+      connection.query(SQl, (error, result1) => {
+        connection.release()
+        if (error) 
+        throw (error)
+        res.render('Gallery', { Gallery: result1 });
+  })
+  
+    }
+  })
+  })
 
 
 
@@ -666,6 +851,5 @@ port = 2330
 app.listen(port, () => {
   console.log(`we are cruising nicely on port ${port}`)
 })
-
 
 
