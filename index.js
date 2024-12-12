@@ -11,7 +11,6 @@ const MySQLStore = require('express-mysql-session')(session);
 const sessionStore = new MySQLStore({}, connection);
 app.set("views", path.join(__dirname, "views")); 
 app.set('view engine', 'ejs');
-console.log(`Views Directory: ${path.join(__dirname, 'views')}`)
 app.use(session({
    key: 'session_cookie_name', 
    secret: 'session_cookie_secret', 
@@ -227,7 +226,7 @@ app.post('/Personal', (req, res) => {
       throw error
     }
     else {
-      var sql = "INSERT INTO Personal(Level, RegNo,Programme,Phone_No,Address)values(?,?,?,?,?)";
+      var sql = "INSERT INTO personal(Level, RegNo,Programme,Phone_No,Address)values(?,?,?,?,?)";
       connection.query(sql, [Level, RegNo,Programme,Phone_No,Address], (error, result) => {
         connection.release();
         if (error) {
@@ -543,7 +542,7 @@ app.post('/Programs_Desk',(req,res)=>{
         throw error
       }
       else {
-        var sql = "INSERT INTO Programs_Desk(Activity,Day,Date,Month)values(?,?,?,?)";
+        var sql = "INSERT INTO programs_desk(Activity,Day,Date,Month)values(?,?,?,?)";
         connection.query(sql, [Activity,Day,Date,Month], (error, result) => {
           connection.release()
           if (error) {
@@ -565,7 +564,7 @@ app.get('/Events_Calender',(req,res)=>{
     }
     else {
   
-    var SQl = "SELECT * FROM Programs_Desk where month=?";
+    var SQl = "SELECT * FROM programs_desk where month=?";
       connection.query(SQl,[Month], (error, result) => {
         connection.release()
         if (error)
@@ -616,7 +615,7 @@ app.get('/Exec',(req,res)=>{
    }
    else {
  
-    var SQl="SELECT Name, Position, Image FROM Exec WHERE Year = ? ORDER BY ID_NO;" 
+    var SQl="SELECT Name, Position, Image FROM exec WHERE Year = ? ORDER BY ID_NO;" 
      
      connection.query(SQl,[Year], (error, result) => {
       connection.release()
@@ -809,7 +808,7 @@ app.post('/Photo_Link', upload.single('Image'), (req, res) => {
      throw error
    }
    else {
-     var sql = "INSERT INTO Photo_Link(Link,Title,Image)values(?,?,?)";
+     var sql = "INSERT INTO photo_link(Link,Title,Image)values(?,?,?)";
      connection.query(sql, [Link,Title,Image], (error, result) => {
       connection.release()
        if (error) {
@@ -833,7 +832,7 @@ app.get('/Gallery',(req,res)=>{
     }
     else {
   
-    var SQl = "SELECT Link,Title,Image FROM Photo_Link";
+    var SQl = "SELECT Link,Title,Image FROM photo_link";
       connection.query(SQl, (error, result1) => {
         connection.release()
         if (error) 
