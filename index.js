@@ -124,7 +124,7 @@ app.post('/SignUp', (req, res) => {
       res.status(500).send("Database connection error.");
       return;
     } else {
-      const sql = "INSERT INTO Users (Fullname, Email, RegNo, Password) VALUES (?, ?, ?, ?)";
+      const sql = "INSERT INTO users (Fullname, Email, RegNo, Password) VALUES (?, ?, ?, ?)";
       connection.query(sql, [Fullname, Email, RegNo, Password], (error, result) => {
         // Ensure the connection is released back to the pool
         connection.release();
